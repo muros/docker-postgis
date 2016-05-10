@@ -1,6 +1,6 @@
 #--------- Generic stuff all our Dockerfiles should start with so we get caching ------------
 FROM debian:stable
-MAINTAINER Tim Sutton<tim@kartoza.com>
+MAINTAINER Uros Mesaric<upumesar@gmail.com>
 
 RUN  export DEBIAN_FRONTEND=noninteractive
 ENV  DEBIAN_FRONTEND noninteractive
@@ -10,11 +10,16 @@ RUN  dpkg-divert --local --rename --add /sbin/initctl
 # Use local cached debs from host (saves your bandwidth!)
 # Change ip below to that of your apt-cacher-ng host
 # Or comment this line out if you do not with to use caching
-ADD 71-apt-cacher-ng /etc/apt/apt.conf.d/71-apt-cacher-ng
+#ADD 71-apt-cacher-ng /etc/apt/apt.conf.d/71-apt-cacher-ng
 
 #RUN echo "deb http://archive.ubuntu.com/ubuntu trusty main universe" > /etc/apt/sources.list
 RUN apt-get -y update
 RUN apt-get -y install ca-certificates rpl pwgen
+
+# Add OSM specific tools for map conversion and loading into Postgis
+RUN apt-get -y install osmctools
+RUN apt-get -y install osm2pgsql
+RUN apt-get -y install wget
 
 #-------------Application Specific Stuff ----------------------------------------------------
 
