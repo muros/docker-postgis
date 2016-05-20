@@ -82,7 +82,6 @@ until `nc -z 127.0.0.1 5432`; do
 done
 echo "postgres ready"
 
-
 RESULT=`su - postgres -c "psql -l | grep postgis | wc -l"`
 if [[ ${RESULT} == '1' ]]
 then
@@ -125,6 +124,23 @@ else
     # It will be owned by the docker db user
     su - postgres -c "createdb -O $POSTGRES_USER -T template_postgis gis"
 fi
+
+# If OSM data is not loaded fill it with Slovenia
+su - postgres -c "psql -f /osm_check.sql"
+RESULT=`su - postgres -c "psql -f /osm_check.sql | grep '1 row' | wc -l"`
+if [[ ${RESULT} == '1' ]]
+then
+    echo 'OSM data Already There'
+else
+    echo "OSM data is missing, inserting now"
+    wget -O slovenija.osm.pbf "http://data.osm-hr.org/slovenia/slovenia.osm.pbf"
+    osmconvert  slovenija.osm.pbf > /tmp/slovenija.osm
+    chmod 666 /tmp/slovenija.osm
+    rm slovenija.osm.pbf
+    su - postgres -c "osm2pgsql -s -d gis /tmp/slovenija.osm"
+    rm /tmp/slovenija.osm
+fi
+
 # This should show up in docker logs afterwards
 su - postgres -c "psql -l"
 

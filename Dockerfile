@@ -36,6 +36,8 @@ EXPOSE 5432
 
 # Run any additional tasks here that are too tedious to put in
 # this dockerfile directly.
+ADD osm_check.sql /osm_check.sql
+RUN chmod 0644 /osm_check.sql
 ADD setup.sh /setup.sh
 RUN chmod 0755 /setup.sh
 RUN /setup.sh
